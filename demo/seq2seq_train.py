@@ -6,8 +6,13 @@ from keras_text_summarization.library.utility.plot_utils import plot_and_save_hi
 from keras_text_summarization.library.seq2seq import Seq2SeqSummarizer
 from keras_text_summarization.library.applications.fake_news_loader import fit_text
 import numpy as np
+import os
+import tensorflow as tf
 
 LOAD_EXISTING_WEIGHTS = False
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
 
 def main():
@@ -17,12 +22,14 @@ def main():
     model_dir_path = './models'
 
     print('loading csv file ...')
-    df = pd.read_csv(data_dir_path + "/fake_or_real_news.csv")
+    #df = pd.read_csv(data_dir_path + "/fake_or_real_news.csv")
 
     print('extract configuration from input texts ...')
-    Y = df.title
-    X = df['text']
+    with open(data_dir_path + '/train.en') as f:
+        X = f.read().split('\n');
 
+    with open(data_dir_path + '/train.de') as f:
+        Y = f.read().split('\n');
     config = fit_text(X, Y)
 
     summarizer = Seq2SeqSummarizer(config)
@@ -36,7 +43,7 @@ def main():
     print('testing size: ', len(Xtest))
 
     print('start fitting ...')
-    history = summarizer.fit(Xtrain, Ytrain, Xtest, Ytest, epochs=100)
+    history = summarizer.fit(Xtrain, Ytrain, Xtest, Ytest, epochs=40)
 
     history_plot_file_path = report_dir_path + '/' + Seq2SeqSummarizer.model_name + '-history.png'
     if LOAD_EXISTING_WEIGHTS:

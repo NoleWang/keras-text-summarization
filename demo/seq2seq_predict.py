@@ -11,24 +11,28 @@ def main():
     model_dir_path = './models'
 
     print('loading csv file ...')
-    df = pd.read_csv(data_dir_path + "/fake_or_real_news.csv")
-    X = df['text']
-    Y = df.title
+    with open(data_dir_path + '/train.en') as f:
+        X = f.read().split('\n');
 
-    config = np.load(Seq2SeqSummarizer.get_config_file_path(model_dir_path=model_dir_path)).item()
+    with open(data_dir_path + '/train.de') as f:
+        Y = f.read().split('\n');
+
+    config = np.load(Seq2SeqSummarizer.get_config_file_path(model_dir_path=model_dir_path),allow_pickle=True).item()
 
     summarizer = Seq2SeqSummarizer(config)
     summarizer.load_weights(weight_file_path=Seq2SeqSummarizer.get_weight_file_path(model_dir_path=model_dir_path))
 
     print('start predicting ...')
-    for i in np.random.permutation(np.arange(len(X)))[0:20]:
+    file1 = open("output.txt","w") 
+    for i in np.random.permutation(np.arange(len(X)))[0:100]:
         x = X[i]
         actual_headline = Y[i]
         headline = summarizer.summarize(x)
         # print('Article: ', x)
-        print('Generated Headline: ', headline)
-        print('Original Headline: ', actual_headline)
-
+        file1.writelines('Input sentence: \n' + x + '\n')
+        file1.writelines('Decoded sentence: \n'+headline+ '\n')
+        file1.writelines('Original Decoded sentence: \n'+actual_headline+ '\n\n')
+    file1.close()
 
 if __name__ == '__main__':
     main()
