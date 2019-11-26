@@ -3,7 +3,12 @@ from __future__ import print_function
 import pandas as pd
 from keras_text_summarization.library.seq2seq import Seq2SeqSummarizer
 import numpy as np
+import os
+import tensorflow as tf
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
 def main():
     np.random.seed(42)
@@ -11,10 +16,10 @@ def main():
     model_dir_path = './models'
 
     print('loading csv file ...')
-    with open(data_dir_path + '/train.en') as f:
+    with open(data_dir_path + '/validation.en') as f:
         X = f.read().split('\n');
 
-    with open(data_dir_path + '/train.de') as f:
+    with open(data_dir_path + '/validation.de') as f:
         Y = f.read().split('\n');
 
     config = np.load(Seq2SeqSummarizer.get_config_file_path(model_dir_path=model_dir_path),allow_pickle=True).item()
@@ -23,8 +28,8 @@ def main():
     summarizer.load_weights(weight_file_path=Seq2SeqSummarizer.get_weight_file_path(model_dir_path=model_dir_path))
 
     print('start predicting ...')
-    file1 = open("output.txt","w") 
-    for i in np.random.permutation(np.arange(len(X)))[0:100]:
+    file1 = open("output_validation.txt","w") 
+    for i in np.random.permutation(np.arange(len(X))):
         x = X[i]
         actual_headline = Y[i]
         headline = summarizer.summarize(x)

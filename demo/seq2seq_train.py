@@ -25,10 +25,10 @@ def main():
     #df = pd.read_csv(data_dir_path + "/fake_or_real_news.csv")
 
     print('extract configuration from input texts ...')
-    with open(data_dir_path + '/train.en') as f:
+    with open(data_dir_path + '/train_preprocessed.en') as f:
         X = f.read().split('\n');
 
-    with open(data_dir_path + '/train.de') as f:
+    with open(data_dir_path + '/train_preprocessed.de') as f:
         Y = f.read().split('\n');
     config = fit_text(X, Y)
 
